@@ -76,7 +76,8 @@ app.get("/Home",(req,res) => {
 })
 
 app.get("/Success",(req,res) =>{
-    return res.render('success.ejs');
+    // return res.render('success.ejs');
+    return res.redirect('http://localhost:5173/');
 })
 
 app.get("/auth/google",passport.authenticate('google',{
