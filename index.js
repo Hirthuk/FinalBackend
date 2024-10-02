@@ -10,6 +10,7 @@ import session from 'express-session'
 import passport, { Passport } from 'passport'
 import { Strategy as LocalStrategy } from 'passport-local';
 import GoogleStartegy from 'passport-google-oauth2';
+import cors from 'cors'
 
 const app = express();
 const port = 3000;
@@ -26,6 +27,11 @@ app.use(express.static(path.join(__dirname, 'src/public')));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.set('view engine','ejs');
 
+app.use(cors({
+    origin : process.env.CORS_URL,
+    credentials: true,
+}
+))
 app.use(session(
     {
         secret: process.env.SESSION_SECRET,
@@ -33,6 +39,7 @@ app.use(session(
         saveUninitialized: true,
         cookie: {
             maxAge: 1000 * 60 *60,
+            secure: false,
         }
     }
 ));
@@ -66,18 +73,34 @@ app.get("/", (req, res) => {
 
 app.get("/Home",(req,res) => {
     if(req.isAuthenticated() ){
+        
         console.log('session:', req.session);
         console.log('User:', req.user);
-        return res.render('error.ejs', {  heading: "Success" ,message: "You have been logged in", redirectUrl: '/Success' });
+        return res.render('error.ejs', {  heading: "Success" ,message: `You have been logged in  ${req.user.firstname}`, redirectUrl: '/Success' });
     }
     else{
        return res.redirect("/");
     }
 })
 
+app.get("/UsernameDetails",(req,res) => {
+    if(req.isAuthenticated()) {
+       return res.json({
+        firstName: req.user.firstname,
+       })
+        
+    }
+})
+
 app.get("/Success",(req,res) =>{
     // return res.render('success.ejs');
+     console.log(req.user.firstname);
+    //  return res.json({
+    //     firstName: req.user.firstname,
+    //    })
     return res.redirect('http://localhost:5173/');
+    
+   
 })
 
 app.get("/auth/google",passport.authenticate('google',{
