@@ -38,7 +38,7 @@ app.use(session(
         resave: false,
         saveUninitialized: true,
         cookie: {
-            maxAge: 1000 * 60 *60,
+            maxAge: 1000 * 60 *120,
             secure: false,
         }
     }
@@ -74,8 +74,8 @@ app.get("/", (req, res) => {
 app.get("/Home",(req,res) => {
     if(req.isAuthenticated() ){
         
-        console.log('session:', req.session);
-        console.log('User:', req.user);
+        // console.log('session:', req.session);
+        // console.log('User:', req.user);
         return res.render('error.ejs', {  heading: "Success" ,message: `You have been logged in  ${req.user.firstname}`, redirectUrl: '/Success' });
     }
     else{
@@ -83,14 +83,39 @@ app.get("/Home",(req,res) => {
     }
 })
 
-app.get("/UsernameDetails",(req,res) => {
-    if(req.isAuthenticated()) {
-       return res.json({
-        firstName: req.user.firstname,
-       })
-        
+app.get("/UsernameDetails", (req, res) => {
+    if (req.isAuthenticated()) {
+      const query = "SELECT email, lastname, ContactInfo FROM user_record WHERE firstname = ?";
+      
+      db.query(query, [req.user.firstname], (err, results) => {
+        if (err) {
+          console.log(err.code);
+          return res.status(500).send("Internal Server Error");
+        }
+  
+        if (results.length > 0) {
+          // Successfully retrieved data from the database
+        //   console.log(results[0]);
+  
+          // Send the results as the response
+          return res.json({
+            firstName: req.user.firstname,
+            email: results[0].email,
+            lastname: results[0].lastname,
+            ContactInfo: results[0].ContactInfo,
+              // Use the first result (assuming firstname is unique)
+          });
+        } else {
+          // No results found
+          console.log("No matching records found");
+          return res.status(404).send("No matching records found");
+        }
+      });
+    } else {
+      return res.status(401).send("Unauthorized access. Please log in.");
     }
-})
+  });
+  
 
 app.get("/Success",(req,res) =>{
     // return res.render('success.ejs');
