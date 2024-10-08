@@ -23,8 +23,10 @@ const __dirname = path.dirname(__filename);
 
 // Serve static files from the "public" directory
 app.use(express.static(path.join(__dirname, 'src/public')));
-
+app.use(express.json());
+// Cool thing - to receive data from json form(axis will send in json in req.body)
 app.use(bodyParser.urlencoded({ extended: true }));
+// This is too get the req.body details from the url they pass
 app.set('view engine','ejs');
 
 app.use(cors({
@@ -38,7 +40,7 @@ app.use(session(
         resave: false,
         saveUninitialized: true,
         cookie: {
-            maxAge: 1000 * 60 *120,
+            maxAge: 1000 * 60 *60,
             secure: false,
         }
     }
@@ -136,6 +138,17 @@ app.get("/auth/google/secrets", passport.authenticate("google" , {
     successRedirect: "/Success",
     failureRedirect: "/"
 }))
+
+app.post("/receiveUserDetails", (req, res) => {
+    console.log(req.body); // Check that the whole body is being received properly
+    const { firstname, lastname, contact, email } = req.body;
+
+    console.log("Received Firstname:", firstname);
+    res.status(200).send("User details received"); 
+    // There was a issue where await in axios not going nextline(alert) so with res.status send it working fine
+    // So it is awaiting for response once got moved to alert part
+});
+
 
 
 
