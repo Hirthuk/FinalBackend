@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { request, response } from 'express';
 import bodyParser from 'body-parser';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -67,6 +67,11 @@ db.connect(err => {
     
 })
 
+const capitalizeFirstLetter = (username) => {
+    const name = username[0].toUpperCase()+username.slice(1);
+    return name;
+}
+
 
 // Serve the index.html file
 app.get("/", (req, res) => {
@@ -101,7 +106,7 @@ app.get("/UsernameDetails", (req, res) => {
   
           // Send the results as the response
           return res.json({
-            firstName: req.user.firstname,
+            firstName: capitalizeFirstLetter(req.user.firstname),
             email: results[0].email,
             lastname: results[0].lastname,
             ContactInfo: results[0].ContactInfo,
@@ -140,13 +145,59 @@ app.get("/auth/google/secrets", passport.authenticate("google" , {
 }))
 
 app.post("/receiveUserDetails", (req, res) => {
-    console.log(req.body); // Check that the whole body is being received properly
+    // console.log(req.body); // Check that the whole body is being received properly
     const { firstname, lastname, contact, email } = req.body;
+    // Obove is object destructuring
 
-    console.log("Received Firstname:", firstname);
-    res.status(200).send("User details received"); 
+    // console.log("Received Firstname:", firstname);
+    // res.status(200).send("User details received"); 
     // There was a issue where await in axios not going nextline(alert) so with res.status send it working fine
     // So it is awaiting for response once got moved to alert part
+    
+    if(req.isAuthenticated()){
+        const selectQuery = "select email, ContactInfo from user_record where firstname = ?;"
+      db.query(selectQuery,[req.user.firstname],(err,result) => {
+                // console.log(result);
+                
+                    if(email === result[0].email){
+                        const withoutEmailquery = "update user_record set firstname = ?, lastname = ? , ContactInfo = ? where firstname = ? ;"
+                        db.query(withoutEmailquery,[capitalizeFirstLetter(firstname),lastname,contact,req.user.firstname],(err,result) => {
+                            if(err){
+                                res.json({
+                                    response: "Internal error occured"
+                                })
+                            }
+                            else{
+                                res.json({
+                                    response: "Data has been updated"
+                                })
+                            }
+                        })
+                    }
+                
+                else{
+                    const query = "update user_record set firstname = ?, lastname = ? ,email = ?, ContactInfo = ? where firstname = ? ;"
+                db.query(query,[capitalizeFirstLetter(firstname),lastname,email,contact,req.user.firstname],(err,result) => {
+            if(err){
+               res.json({
+                response: "Internal error occured"
+               })
+            }
+
+            else{
+                
+                res.json({
+                    response: "Details have been updated with your latest details"
+                })
+            }
+        })
+
+                }
+
+        })
+        
+    }
+    
 });
 
 
