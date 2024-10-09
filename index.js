@@ -158,18 +158,23 @@ app.post("/receiveUserDetails", (req, res) => {
         const selectQuery = "select email, ContactInfo from user_record where firstname = ?;"
       db.query(selectQuery,[req.user.firstname],(err,result) => {
                 // console.log(result);
+                console.log(result[0].email);
                 
                     if(email === result[0].email){
                         const withoutEmailquery = "update user_record set firstname = ?, lastname = ? , ContactInfo = ? where firstname = ? ;"
                         db.query(withoutEmailquery,[capitalizeFirstLetter(firstname),lastname,contact,req.user.firstname],(err,result) => {
-                            if(err){
+                            if(result.length > 0){
                                 res.json({
-                                    response: "Internal error occured"
+                                    
+                                    response: "Data has been updated"
                                 })
                             }
                             else{
+                                console.log(err);
                                 res.json({
-                                    response: "Data has been updated"
+                                    
+                                    response: "Internal error occured"
+                                    
                                 })
                             }
                         })
@@ -179,8 +184,10 @@ app.post("/receiveUserDetails", (req, res) => {
                     const query = "update user_record set firstname = ?, lastname = ? ,email = ?, ContactInfo = ? where firstname = ? ;"
                 db.query(query,[capitalizeFirstLetter(firstname),lastname,email,contact,req.user.firstname],(err,result) => {
             if(err){
+                console.log(err);
                res.json({
-                response: "Internal error occured"
+
+                response: "Details have been updated with your latest details"
                })
             }
 
