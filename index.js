@@ -154,6 +154,7 @@ app.post("/receiveUserDetails", (req, res) => {
     // There was a issue where await in axios not going nextline(alert) so with res.status send it working fine
     // So it is awaiting for response once got moved to alert part
     
+    
     if(req.isAuthenticated()){
         const selectQuery = "select email, ContactInfo from user_record where firstname = ?;"
       db.query(selectQuery,[req.user.firstname],(err,result) => {
@@ -170,7 +171,7 @@ app.post("/receiveUserDetails", (req, res) => {
                                 })
                             }
                             else{
-                                console.log(err);
+                                // console.log(err);
                                 res.json({
                                     
                                     response: "Internal error occured"
@@ -187,7 +188,7 @@ app.post("/receiveUserDetails", (req, res) => {
                 console.log(err);
                res.json({
 
-                response: "Details have been updated with your latest details"
+                response: "Internal error occured"
                })
             }
 
@@ -206,6 +207,15 @@ app.post("/receiveUserDetails", (req, res) => {
     }
     
 });
+
+app.post('/FavouriteDetails',(req,res) => {
+    const {id, dish , price} = req.body;
+    // console.log(dish);
+    if(req.isAuthenticated()){
+        const favouriteAddedQuery = 'update userFavouriteDish set userid = ?, dishID = ?'
+    }
+    
+})
 
 
 
