@@ -210,9 +210,17 @@ app.post("/receiveUserDetails", (req, res) => {
 
 app.post('/FavouriteDetails',(req,res) => {
     const {id, dish , price} = req.body;
-    // console.log(dish);
+    // name should be same as it is when we doing object destructruing
+    console.log(req.body);
+    console.log(`Req is authenticated ${req.isAuthenticated()}`);
+    console.log(req.user);
     if(req.isAuthenticated()){
-        const favouriteAddedQuery = 'update userFavouriteDish set userid = ?, dishID = ?'
+        console.log(req.id);
+        console.log(id);
+        const favouriteAddedQuery = 'insert into userFavouriteDish values (?,?);'
+        db.query(favouriteAddedQuery, [req.user.id, id],(err,result) => {
+            
+        })
     }
     
 })
