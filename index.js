@@ -164,7 +164,8 @@ app.post("/receiveUserDetails", (req, res) => {
                     if(email === result[0].email){
                         const withoutEmailquery = "update user_record set firstname = ?, lastname = ? , ContactInfo = ? where firstname = ? ;"
                         db.query(withoutEmailquery,[capitalizeFirstLetter(firstname),lastname,contact,req.user.firstname],(err,result) => {
-                            if(result.length > 0){
+                            if(result){
+                                
                                 res.json({
                                     
                                     response: "Data has been updated"
@@ -213,16 +214,76 @@ app.post('/FavouriteDetails',(req,res) => {
     // name should be same as it is when we doing object destructruing
     console.log(req.body);
     console.log(`Req is authenticated ${req.isAuthenticated()}`);
-    console.log(req.user);
+    // console.log(req.user.id); I have added in the passport local startergy query so that we can grab  this
+    // We should have started checking  with id only instead of firstanme, next project cross check with id
     if(req.isAuthenticated()){
-        console.log(req.id);
-        console.log(id);
-        const favouriteAddedQuery = 'insert into userFavouriteDish values (?,?);'
-        db.query(favouriteAddedQuery, [req.user.id, id],(err,result) => {
+        // console.log(req.id); It is undefined because we  are sending only firstname and password in user
+        // console.log(id);
+        const checkFavalreadyexist = "select * from userFavouriteDish where userid = ? and dishId = ? "
+        db.query(checkFavalreadyexist,[req.user.id, id],(err,result) => {
+            if(err){
+                res.json({
+                    response: "Internal error occured"
+                })
+            }
+            else if(result.length > 0){
+                res.json({
+                    response: "This Dish is already exists in your favourite"
+                })
+            }
+            else{
+                const favouriteAddedQuery = 'insert into userFavouriteDish values (?,?,?);'
+        db.query(favouriteAddedQuery, [req.user.id, id, req.user.firstname],(err,result) => {
+            if(result){
+                res.json({
+                    response: "Favourites has been added",
+                    })
+            }
+            else{
+                console.log('Error occured in else  '+ err);
+                res.json({
+                    response: "Internall error  occured try again later",
+                   
+                })
+            }
             
         })
+                
+            }
+        })
+        
     }
     
+})
+
+app.get("/getFavouritesUser",(req,res) => {
+    const query = "select dishId from userFavouriteDish where userid = ?;"
+    if(req.isAuthenticated()){
+        db.query(query,[req.user.id],(err,result) => {
+            // console.log(result.length);
+            if(result){
+                res.json({
+                    response: result,
+                })
+            }
+            else if(result.length == 0){
+                res.json({
+                    response: "Kindly add any favourites"
+                })
+            }
+            else{
+                res.json({
+                    response: "Internal error occured"
+                })
+            }
+
+        })
+    }
+    else{
+        res.json({
+            response: "Login again please"
+        })
+    }
 })
 
 
@@ -283,7 +344,7 @@ app.post("/Signup",(req,res)=> {
 // the name is username and password in the form
 passport.use('local',new LocalStrategy(async function verify(username, password, cb) {
     try {
-        const query = "SELECT firstname, password FROM user_record WHERE email = ?";
+        const query = "SELECT firstname, password , id FROM user_record WHERE email = ?";
         await db.query(query, [username], (err, results) => {
             if (err) {
                 console.log(err);
