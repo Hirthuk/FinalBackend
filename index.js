@@ -286,6 +286,33 @@ app.get("/getFavouritesUser",(req,res) => {
     }
 })
 
+app.post("/getDishDetailsforFavouroite",(req,res) => {
+    const DishId = req.body.dishIds;
+    console.log(DishId);
+    const query = "select dishName, price from dishes where dishId = ?;"
+    try {
+        db.query(query, [DishId],(err,result) => {
+            // console.log(result[0].dishName)
+            if(result){
+                console.log(result);
+                res.json({
+                    response: result
+                })
+            }
+            else{
+                res.json({
+                    response: "Error occured try again"
+                })
+            }
+        })
+    } catch (error) {
+        res.json({
+            response: "Database issue check later"
+        })
+        
+        
+    }
+})
 
 
 
