@@ -287,7 +287,7 @@ app.get("/getFavouritesUser",(req,res) => {
 })
 
 app.post("/getDishDetailsforFavouroite",(req,res) => {
-    const DishId = req.body.dishIds;
+    const DishId = req.body.dishId;
     console.log(DishId);
     const query = "select dishName, price from dishes where dishId = ?;"
     try {
@@ -296,7 +296,7 @@ app.post("/getDishDetailsforFavouroite",(req,res) => {
             if(result){
                 console.log(result);
                 res.json({
-                    response: result
+                    response: result[0]
                 })
             }
             else{
