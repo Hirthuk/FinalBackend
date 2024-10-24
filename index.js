@@ -209,6 +209,41 @@ app.post("/receiveUserDetails", (req, res) => {
     
 });
 
+app.post("/CartDetails",(req,res) => {
+    // console.log(req.body);
+    const{ id, dish, price} = req.body;
+    if(req.isAuthenticated()){
+        const query = "insert into userCart values(?,?,?)"
+        try {
+            db.query(query,[req.user.id,id,req.user.firstname],(err,result) => {
+                // result.length is getting undefined so database is updating but error coming.
+                // Better always check error as true or false value inside this
+                console.log(result.length)
+                if(err){
+                    res.json({
+                        response: "Internal error occured"
+                    })
+                   
+                }
+               
+                else {
+                    res.json({
+                        response: "Cart has been updated"
+                       })
+                   
+                    
+                }
+            })
+        } catch (error) {
+            res.json({
+                response: "Database error has been occured"
+            })
+            
+        }
+    }
+    
+})
+
 app.post('/FavouriteDetails',(req,res) => {
     const {id, dish , price} = req.body;
     // name should be same as it is when we doing object destructruing
@@ -255,6 +290,37 @@ app.post('/FavouriteDetails',(req,res) => {
     }
     
 })
+app.get("/getCartDetails",(req,res) => {
+    const query = "select dishId from userCart where userid = ?;"
+    if(req.isAuthenticated()){
+        db.query(query,[req.user.id],(err,result) => {
+            // console.log(result.length);
+            if(result){
+                res.json({
+                    response: result,
+                })
+            }
+            else if(result.length == 0){
+                res.json({
+                    response: "Don't have anything in your cart"
+                })
+            }
+            else{
+                res.json({
+                    response: "Internal error occured"
+                })
+            }
+
+        })
+    }
+    else{
+        res.json({
+            response: "Login again please"
+        })
+    }
+})
+
+
 
 app.get("/getFavouritesUser",(req,res) => {
     const query = "select dishId from userFavouriteDish where userid = ?;"
@@ -285,6 +351,35 @@ app.get("/getFavouritesUser",(req,res) => {
         })
     }
 })
+app.post("/getDishDetailsforCart",(req,res) => {
+    const DishId = req.body.dishId;
+    console.log(DishId);
+    const query = "select dishName, price from dishes where dishId = ?;"
+    try {
+        db.query(query, [DishId],(err,result) => {
+            // console.log(result[0].dishName)
+            if(result){
+                console.log(result);
+                res.json({
+                    response: result[0]
+                })
+            }
+            else{
+                res.json({
+                    response: "Error occured try again"
+                })
+            }
+        })
+    } catch (error) {
+        res.json({
+            response: "Database issue check later"
+        })
+        
+        
+    }
+}
+
+)
 
 app.post("/getDishDetailsforFavouroite",(req,res) => {
     const DishId = req.body.dishId;
