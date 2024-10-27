@@ -60,10 +60,10 @@ const db = mysql.createConnection({
 
 db.connect(err => {
     if(err){
-        console.log(`Database connection rejected due to this + ${err}`);
+        // console.log(`Database connection rejected due to this + ${err}`);
         return;
     }
-    console.log("Database connected");
+    // console.log("Database connected");
     
 })
 
@@ -81,8 +81,8 @@ app.get("/", (req, res) => {
 app.get("/Home",(req,res) => {
     if(req.isAuthenticated() ){
         
-        // console.log('session:', req.session);
-        // console.log('User:', req.user);
+        // // console.log('session:', req.session);
+        // // console.log('User:', req.user);
         return res.render('error.ejs', {  heading: "Success" ,message: `You have been logged in  ${req.user.firstname}`, redirectUrl: '/Success' });
     }
     else{
@@ -96,13 +96,13 @@ app.get("/UsernameDetails", (req, res) => {
       
       db.query(query, [req.user.firstname], (err, results) => {
         if (err) {
-          console.log(err.code);
+          // console.log(err.code);
           return res.status(500).send("Internal Server Error");
         }
   
         if (results.length > 0) {
           // Successfully retrieved data from the database
-        //   console.log(results[0]);
+        //   // console.log(results[0]);
   
           // Send the results as the response
           return res.json({
@@ -114,7 +114,7 @@ app.get("/UsernameDetails", (req, res) => {
           });
         } else {
           // No results found
-          console.log("No matching records found");
+          // console.log("No matching records found");
           return res.status(404).send("No matching records found");
         }
       });
@@ -126,7 +126,7 @@ app.get("/UsernameDetails", (req, res) => {
 
 app.get("/Success",(req,res) =>{
     // return res.render('success.ejs');
-     console.log(req.user.firstname);
+     // console.log(req.user.firstname);
     //  return res.json({
     //     firstName: req.user.firstname,
     //    })
@@ -145,11 +145,11 @@ app.get("/auth/google/secrets", passport.authenticate("google" , {
 }))
 
 app.post("/receiveUserDetails", (req, res) => {
-    // console.log(req.body); // Check that the whole body is being received properly
+    // // console.log(req.body); // Check that the whole body is being received properly
     const { firstname, lastname, contact, email } = req.body;
     // Obove is object destructuring
 
-    // console.log("Received Firstname:", firstname);
+    // // console.log("Received Firstname:", firstname);
     // res.status(200).send("User details received"); 
     // There was a issue where await in axios not going nextline(alert) so with res.status send it working fine
     // So it is awaiting for response once got moved to alert part
@@ -158,8 +158,8 @@ app.post("/receiveUserDetails", (req, res) => {
     if(req.isAuthenticated()){
         const selectQuery = "select email, ContactInfo from user_record where firstname = ?;"
       db.query(selectQuery,[req.user.firstname],(err,result) => {
-                // console.log(result);
-                console.log(result[0].email);
+                // // console.log(result);
+                // console.log(result[0].email);
                 
                     if(email === result[0].email){
                         const withoutEmailquery = "update user_record set firstname = ?, lastname = ? , ContactInfo = ? where firstname = ? ;"
@@ -172,7 +172,7 @@ app.post("/receiveUserDetails", (req, res) => {
                                 })
                             }
                             else{
-                                // console.log(err);
+                                // // console.log(err);
                                 res.json({
                                     
                                     response: "Internal error occured"
@@ -186,13 +186,13 @@ app.post("/receiveUserDetails", (req, res) => {
                     const query = "update user_record set firstname = ?, lastname = ? ,email = ?, ContactInfo = ? where firstname = ? ;"
                 db.query(query,[capitalizeFirstLetter(firstname),lastname,email,contact,req.user.firstname],(err,result) => {
             if(err){
-                console.log(err);
+                // console.log(err);
                res.json({
 
                 response: "Internal error occured"
                })
             }
-
+            
             else{
                 
                 res.json({
@@ -210,7 +210,7 @@ app.post("/receiveUserDetails", (req, res) => {
 });
 
 app.post("/CartDetails",(req,res) => {
-    // console.log(req.body);
+    // // console.log(req.body);
     // const{ id, dish, price} = req.body;
     if(req.isAuthenticated()){
         const query = "insert into userCart values(?,?,?)"
@@ -218,7 +218,7 @@ app.post("/CartDetails",(req,res) => {
             db.query(query,[req.user.id,req.body.id,req.user.firstname],(err,result) => {
                 // result.length is getting undefined so database is updating but error coming.
                 // Better always check error as true or false value inside this
-                console.log(result.length)
+                // console.log(result.length)
                 if(err){
                     res.json({
                         response: "Internal error occured"
@@ -247,13 +247,13 @@ app.post("/CartDetails",(req,res) => {
 app.post('/FavouriteDetails',(req,res) => {
     const {id, dish , price} = req.body;
     // name should be same as it is when we doing object destructruing
-    console.log(req.body);
-    console.log(`Req is authenticated ${req.isAuthenticated()}`);
-    // console.log(req.user.id); I have added in the passport local startergy query so that we can grab  this
+    // console.log(req.body);
+    // console.log(`Req is authenticated ${req.isAuthenticated()}`);
+    // // console.log(req.user.id); I have added in the passport local startergy query so that we can grab  this
     // We should have started checking  with id only instead of firstanme, next project cross check with id
     if(req.isAuthenticated()){
-        // console.log(req.id); It is undefined because we  are sending only firstname and password in user
-        // console.log(id);
+        // // console.log(req.id); It is undefined because we  are sending only firstname and password in user
+        // // console.log(id);
         const checkFavalreadyexist = "select * from userFavouriteDish where userid = ? and dishId = ? "
         db.query(checkFavalreadyexist,[req.user.id, id],(err,result) => {
             if(err){
@@ -275,7 +275,7 @@ app.post('/FavouriteDetails',(req,res) => {
                     })
             }
             else{
-                console.log('Error occured in else  '+ err);
+                // console.log('Error occured in else  '+ err);
                 res.json({
                     response: "Internall error  occured try again later",
                    
@@ -294,7 +294,7 @@ app.get("/getCartDetails",(req,res) => {
     const query = "select dishId from userCart where userid = ?;"
     if(req.isAuthenticated()){
         db.query(query,[req.user.id],(err,result) => {
-            // console.log(result.length);
+            // // console.log(result.length);
             if(result){
                 res.json({
                     response: result,
@@ -326,7 +326,7 @@ app.get("/getFavouritesUser",(req,res) => {
     const query = "select dishId from userFavouriteDish where userid = ?;"
     if(req.isAuthenticated()){
         db.query(query,[req.user.id],(err,result) => {
-            console.log(result.length);
+            // console.log(result.length);
 
             if(err){
                 res.json({
@@ -356,13 +356,13 @@ app.get("/getFavouritesUser",(req,res) => {
 })
 app.post("/getDishDetailsforCart",(req,res) => {
     const DishId = req.body.dishId;
-    console.log(DishId);
-    const query = "select dishName, price from dishes where dishId = ?;"
+    // console.log(DishId);
+    const query = "select dishName, price, dishId from dishes where dishId = ?;"
     try {
         db.query(query, [DishId],(err,result) => {
-            // console.log(result[0].dishName)
+            // // console.log(result[0].dishName)
             if(result){
-                console.log(result);
+                // console.log(result);
                 res.json({
                     response: result[0]
                 })
@@ -386,13 +386,13 @@ app.post("/getDishDetailsforCart",(req,res) => {
 
 app.post("/getDishDetailsforFavouroite",(req,res) => {
     const DishId = req.body.dishId;
-    console.log(DishId);
+    // console.log(DishId);
     const query = "select dishName, price, dishId from dishes where dishId = ?;"
     try {
         db.query(query, [DishId],(err,result) => {
-            // console.log(result[0].dishName)
+            // // console.log(result[0].dishName)
             if(result){
-                console.log(result);
+                // console.log(result);
                 res.json({
                     response: result[0]
                 })
@@ -414,6 +414,33 @@ app.post("/getDishDetailsforFavouroite",(req,res) => {
 
 app.post("/removeFavourites",(req,res) => {
     const query = "delete from userFavouriteDish where userid = ? and dishId = ?"
+    const dishId = req.body.dishId;
+    // console.log(dishId);
+    
+    try {
+       db.query(query,[req.user.id,dishId],(err,result)=> {
+        if(err){
+            res.json({
+                response: "Internal error occured"
+            })
+        }
+        else{
+            res.json({
+                response: "Done"
+            })
+        }
+       })
+        
+    } catch (error) {
+        res.json({
+            response: "Database error occured"
+        })
+        
+    }
+})
+
+app.post("/removeCart",(req,res) => {
+    const query = "delete from userCart where userid = ? and dishId = ?"
     const dishId = req.body.dishId;
     console.log(dishId);
     
@@ -469,23 +496,23 @@ app.post("/Login", (req, res, next) => {
 app.post("/Signup",(req,res)=> {
     const {signName, signLastName, logemail,SignPassword} = req.body;
     const query = "INSERT INTO user_record (email, password, lastname, firstname) VALUES (?, ?, ?, ?)";
-    // console.log(SignPassword)
+    // //// console.log(SignPassword)
     bcrypt.hash(SignPassword,saltRounding,(err,hashValue) => {
         if(err){
-            console.log(err);
+            // console.log(err);
         }
         else {
-            // console.log(hashValue);
+            // // console.log(hashValue);
             db.query(query,[logemail,hashValue,signLastName,signName],(err, result) => {
                 if(err){
                     if(err.code === "ER_DUP_ENTRY"){
                         return res.render('error', { heading: 'Failed', message: "Current email is already registered. Try Logging in", redirectUrl: '/' });
                     }
                     res.status(500).send("We faced an internal issue");
-                    console.log(err);
+                    // console.log(err);
                     return;
                 }
-                // console.log(result);
+                // // console.log(result);
                 return res.render('error', { heading: 'Success', message: "Your details has been saved. Try logging", redirectUrl: '/' });
             })
         }
@@ -499,7 +526,7 @@ passport.use('local',new LocalStrategy(async function verify(username, password,
         const query = "SELECT firstname, password , id FROM user_record WHERE email = ?";
         await db.query(query, [username], (err, results) => {
             if (err) {
-                console.log(err);
+                // console.log(err);
                 return cb(err);
             }
 
@@ -513,7 +540,7 @@ passport.use('local',new LocalStrategy(async function verify(username, password,
 
             bcrypt.compare(password, hashedPassword, (err, isMatch) => {
                 if (err) {
-                    console.log(err);
+                    // console.log(err);
                     return cb(err);
                 }
 
@@ -549,12 +576,12 @@ passport.use('google',
     },
     async (accessToken, refreshToken, profile, cb) => {
 
-        console.log(profile);
+        // console.log(profile);
         try {
             const query = "SELECT * FROM user_record WHERE email = ?";
             await db.query(query, [profile.email], (err, results) => {
                 if (err) {
-                    console.log(err);
+                    // console.log(err);
                     return cb(err);
                 }
 
@@ -570,13 +597,13 @@ passport.use('google',
 
                     db.query(insertQuery, [profile.email, password, firstName, lastName], (err, result) => {
                         if (err) {
-                            console.log(err);
+                            // console.log(err);
                             return cb(err);
                         }
                         // Fetch the new user
                         db.query(query, [profile.email], (err, newUserResults) => {
                             if (err) {
-                                console.log(err);
+                                // console.log(err);
                                 return cb(err);
                             }
                             return cb(null, newUserResults[0]);
@@ -591,5 +618,5 @@ passport.use('google',
 ));
 
 app.listen(port, () => {
-    console.log(`Server started running on port ${port}`);
+    // console.log(`Server started running on port ${port}`);
 });
