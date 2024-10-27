@@ -211,11 +211,11 @@ app.post("/receiveUserDetails", (req, res) => {
 
 app.post("/CartDetails",(req,res) => {
     // console.log(req.body);
-    const{ id, dish, price} = req.body;
+    // const{ id, dish, price} = req.body;
     if(req.isAuthenticated()){
         const query = "insert into userCart values(?,?,?)"
         try {
-            db.query(query,[req.user.id,id,req.user.firstname],(err,result) => {
+            db.query(query,[req.user.id,req.body.id,req.user.firstname],(err,result) => {
                 // result.length is getting undefined so database is updating but error coming.
                 // Better always check error as true or false value inside this
                 console.log(result.length)
@@ -326,21 +326,24 @@ app.get("/getFavouritesUser",(req,res) => {
     const query = "select dishId from userFavouriteDish where userid = ?;"
     if(req.isAuthenticated()){
         db.query(query,[req.user.id],(err,result) => {
-            // console.log(result.length);
-            if(result){
+            console.log(result.length);
+
+            if(err){
                 res.json({
-                    response: result,
+                    response: "Internal error occured"
                 })
+                
             }
-            else if(result.length == 0){
+            else if(result && result.length == 0){
                 res.json({
                     response: "Kindly add any favourites"
                 })
             }
             else{
                 res.json({
-                    response: "Internal error occured"
+                    response: result,
                 })
+               
             }
 
         })
@@ -384,7 +387,7 @@ app.post("/getDishDetailsforCart",(req,res) => {
 app.post("/getDishDetailsforFavouroite",(req,res) => {
     const DishId = req.body.dishId;
     console.log(DishId);
-    const query = "select dishName, price from dishes where dishId = ?;"
+    const query = "select dishName, price, dishId from dishes where dishId = ?;"
     try {
         db.query(query, [DishId],(err,result) => {
             // console.log(result[0].dishName)
@@ -405,6 +408,33 @@ app.post("/getDishDetailsforFavouroite",(req,res) => {
             response: "Database issue check later"
         })
         
+        
+    }
+})
+
+app.post("/removeFavourites",(req,res) => {
+    const query = "delete from userFavouriteDish where userid = ? and dishId = ?"
+    const dishId = req.body.dishId;
+    console.log(dishId);
+    
+    try {
+       db.query(query,[req.user.id,dishId],(err,result)=> {
+        if(err){
+            res.json({
+                response: "Internal error occured"
+            })
+        }
+        else{
+            res.json({
+                response: "Done"
+            })
+        }
+       })
+        
+    } catch (error) {
+        res.json({
+            response: "Database error occured"
+        })
         
     }
 })
