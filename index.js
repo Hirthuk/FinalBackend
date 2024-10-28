@@ -290,25 +290,73 @@ app.post('/FavouriteDetails',(req,res) => {
     }
     
 })
+app.post('/addFavfromCart',(req,res) => {
+    const {dishId, dishName , price} = req.body;
+    // name should be same as it is when we doing object destructruing
+    // console.log(req.body);
+    // console.log(`Req is authenticated ${req.isAuthenticated()}`);
+    // // console.log(req.user.id); I have added in the passport local startergy query so that we can grab  this
+    // We should have started checking  with id only instead of firstanme, next project cross check with id
+    if(req.isAuthenticated()){
+        // // console.log(req.id); It is undefined because we  are sending only firstname and password in user
+        // // console.log(id);
+        const checkFavalreadyexist = "select * from userFavouriteDish where userid = ? and dishId = ? "
+        db.query(checkFavalreadyexist,[req.user.id, dishId],(err,result) => {
+            if(err){
+                res.json({
+                    response: "Internal error occured"
+                })
+            }
+            else if(result.length > 0){
+                res.json({
+                    response: "This Dish is already exists in your favourite"
+                })
+            }
+            else{
+                const favouriteAddedQuery = 'insert into userFavouriteDish values (?,?,?);'
+        db.query(favouriteAddedQuery, [req.user.id, dishId, req.user.firstname],(err,result) => {
+            if(result){
+                res.json({
+                    response: "Favourites has been added",
+                    })
+            }
+            else{
+                // console.log('Error occured in else  '+ err);
+                res.json({
+                    response: "Internall error  occured try again later",
+                   
+                })
+            }
+            
+        })
+                
+            }
+        })
+        
+    }
+    
+})
 app.get("/getCartDetails",(req,res) => {
     const query = "select dishId from userCart where userid = ?;"
     if(req.isAuthenticated()){
         db.query(query,[req.user.id],(err,result) => {
             // // console.log(result.length);
-            if(result){
+            if(err){
                 res.json({
-                    response: result,
+                    response: "Internal error occured"
                 })
+                
             }
-            else if(result.length == 0){
+            else if(result && result.length == 0){
                 res.json({
                     response: "Don't have anything in your cart"
                 })
             }
             else{
                 res.json({
-                    response: "Internal error occured"
+                    response: result,
                 })
+               
             }
 
         })
